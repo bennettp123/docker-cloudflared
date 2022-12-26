@@ -3,7 +3,9 @@ name: ci
 on:
   push:
     branches:
-      - "main"
+      - main
+  schedule:
+    - cron: '0 0 * * *'
 
 jobs:
   docker:
@@ -24,12 +26,24 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Get current version number
+        id: info
+        steps:
+          DESIRED_VERSION="$(gh release list --repo=https://github.com/cloudflare/cloudflared | grep Latest | awk '{ print $1 }')"
+          echo "desired-version=${DESIRED_VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "today=$(date '+%Y-%m-%d')" >> "${GITHUB_OUTPUT}"
+
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: bennettp123/cloudflared:latest
+          build-args:
+            COMMENT: "Today's date: ${{ steps.info.today }}"
+            DESIRED_VERSION: ${{ steps.info.desired-version }}
+          tags:
+           - bennettp123/cloudflared:${{ steps.info.desired-version }}
+           - bennettp123/cloudflared:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
