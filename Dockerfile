@@ -15,7 +15,7 @@ RUN echo "${COMMENT}" \
    && echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared bullseye main' | sudo tee /etc/apt/sources.list.d/cloudflared.list \
    && sudo apt-get update \
    && sudo apt-get install -y \
-       cloudflared"${DESIRED_VERSION:+=${DESIRED_VERSION}"
+       cloudflared"${DESIRED_VERSION:+=${DESIRED_VERSION}}"
 
 FROM scratch
 COPY --from=build /usr/bin/cloudflared /bin/cloudflared
