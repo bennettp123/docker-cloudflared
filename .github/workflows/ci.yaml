@@ -6,6 +6,12 @@ on:
       - main
   schedule:
     - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      desired-version:
+        description: "Which version of cloudflared?"
+        required: false
+        default: ''
 
 jobs:
   docker:
@@ -31,8 +37,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          DESIRED_VERSION="$(gh release list --repo=https://github.com/cloudflare/cloudflared | grep Latest | awk '{ print $1 }')"
-          echo "desired-version=${DESIRED_VERSION}" >> "${GITHUB_OUTPUT}"
+          LATEST_VERSION="$(gh release list --repo=https://github.com/cloudflare/cloudflared | grep Latest | awk '{ print $1 }')"
+          DESIRED_VERSION='${{ inputs.desired-version }}'
+          echo "version=${DESIRED_VERSION:-${LATEST_VERSION}}" >> "${GITHUB_OUTPUT}"
           echo "today=$(date '+%Y-%m-%d')" >> "${GITHUB_OUTPUT}"
 
       - name: Build and push
@@ -43,9 +50,9 @@ jobs:
           push: true
           build-args: |
             "COMMENT=Today's date: ${{ steps.info.outputs.today }}"
-            "DESIRED_VERSION=${{ steps.info.outputs.desired-version }}"
+            "VERSION=${{ steps.info.outputs.version }}"
           tags: |
-           bennettp123/cloudflared:${{ steps.info.outputs.desired-version }}
+           bennettp123/cloudflared:${{ steps.info.outputs.version }}
            bennettp123/cloudflared:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
