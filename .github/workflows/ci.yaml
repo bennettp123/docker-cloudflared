@@ -28,7 +28,7 @@ jobs:
 
       - name: Get current version number
         id: info
-        steps:
+        run:
           DESIRED_VERSION="$(gh release list --repo=https://github.com/cloudflare/cloudflared | grep Latest | awk '{ print $1 }')"
           echo "desired-version=${DESIRED_VERSION}" >> "${GITHUB_OUTPUT}"
           echo "today=$(date '+%Y-%m-%d')" >> "${GITHUB_OUTPUT}"
