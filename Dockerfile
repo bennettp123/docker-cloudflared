@@ -18,7 +18,6 @@ RUN echo "${COMMENT}" \
        cloudflared"${VERSION:+=${VERSION}}"
 
 FROM scratch
-COPY --from=build --chown=nonroot /usr/bin/cloudflared /bin/cloudflared
-USER nonroot
+COPY --from=build /usr/bin/cloudflared /bin/cloudflared
 ENTRYPOINT ["/bin/cloudflared", "--no-autoupdate"]
 CMD ["version"]
